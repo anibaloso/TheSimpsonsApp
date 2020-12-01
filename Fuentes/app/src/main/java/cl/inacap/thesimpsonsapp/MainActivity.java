@@ -14,10 +14,12 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Array;
@@ -40,28 +42,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        queue = Volley.newRequestQueue(this);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         this.listViewPer = findViewById(R.id.lista_simpsons);
         this.btnConsejos = findViewById(R.id.btnConsejo);
         this.cantidad = findViewById(R.id.spinner_cantidad_consejos);
         this.adaptador = new SimpsonsListAdapter(this,
                 R.layout.listar_simpsons, this.simpsons);
         this.listViewPer.setAdapter(this.adaptador);
+        queue = Volley.newRequestQueue(MainActivity.this);
 
-        JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.GET,
+        JsonArrayRequest jsonReq = new JsonArrayRequest(Request.Method.GET,
                 "https://thesimpsonsquoteapi.glitch.me/quotes?count=" + cantidad.getSelectedItem().toString(), null,
-                new Response.Listener<JSONObject>() {
+                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
+                        Toast.makeText(getApplicationContext(),"https://thesimpsonsquoteapi.glitch.me/quotes?count=" + cantidad.getSelectedItem().toString(),Toast.LENGTH_SHORT).show();
                         Toast.makeText(getApplicationContext(),"comienzo try catch",Toast.LENGTH_SHORT).show();
                         try {
                             simpsons.clear();
                             Simpsons[] simpsonsObt = new Gson()
-                                    .fromJson(response.getString("results"),
+                                    .fromJson(response.toString(),
                                             Simpsons[].class);
                             simpsons.addAll(Arrays.asList(simpsonsObt));
                             Toast.makeText(getApplicationContext(),"peticion hecha",Toast.LENGTH_SHORT).show();
-
                         }catch (Exception ex){
                             simpsons = null;
                             Toast.makeText(getApplicationContext(),"Exepcion",Toast.LENGTH_SHORT).show();
@@ -78,18 +86,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         this.btnConsejos.setOnClickListener(view -> {
             Toast.makeText(getApplicationContext(),"Toco Boton y Ejecuto el Json",Toast.LENGTH_SHORT).show();
             Toast.makeText(getApplicationContext(),cantidad.getSelectedItem().toString(),Toast.LENGTH_SHORT).show();
             queue.add(jsonReq);
         });
-
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
     }
 }

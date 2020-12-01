@@ -44,8 +44,6 @@ public class SimpsonsListAdapter extends ArrayAdapter<Simpsons> {
         nombreTxt.setText(this.simpsons.get(position).getCharacter());
         fraseTxt.setText(this.simpsons.get(position).getQuote());
         Picasso.get().load(this.simpsons.get(position).getImage())
-                .resize(300,300)
-                .centerCrop()
                 .into(imagenSimpson);
         return rowView;
     }
