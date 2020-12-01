@@ -54,41 +54,33 @@ public class MainActivity extends AppCompatActivity {
         this.adaptador = new SimpsonsListAdapter(this,
                 R.layout.listar_simpsons, this.simpsons);
         this.listViewPer.setAdapter(this.adaptador);
-        queue = Volley.newRequestQueue(MainActivity.this);
-
-        JsonArrayRequest jsonReq = new JsonArrayRequest(Request.Method.GET,
-                "https://thesimpsonsquoteapi.glitch.me/quotes?count=" + cantidad.getSelectedItem().toString(), null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        Toast.makeText(getApplicationContext(),"https://thesimpsonsquoteapi.glitch.me/quotes?count=" + cantidad.getSelectedItem().toString(),Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplicationContext(),"comienzo try catch",Toast.LENGTH_SHORT).show();
-                        try {
-                            simpsons.clear();
-                            Simpsons[] simpsonsObt = new Gson()
-                                    .fromJson(response.toString(),
-                                            Simpsons[].class);
-                            simpsons.addAll(Arrays.asList(simpsonsObt));
-                            Toast.makeText(getApplicationContext(),"peticion hecha",Toast.LENGTH_SHORT).show();
-                        }catch (Exception ex){
-                            simpsons = null;
-                            Toast.makeText(getApplicationContext(),"Exepcion",Toast.LENGTH_SHORT).show();
-                        }finally {
-                            adaptador.notifyDataSetChanged();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                simpsons = null;
-                adaptador.notifyDataSetChanged();
-                Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_SHORT).show();
-            }
-        });
 
         this.btnConsejos.setOnClickListener(view -> {
-            Toast.makeText(getApplicationContext(),"Toco Boton y Ejecuto el Json",Toast.LENGTH_SHORT).show();
-            Toast.makeText(getApplicationContext(),cantidad.getSelectedItem().toString(),Toast.LENGTH_SHORT).show();
+            queue = Volley.newRequestQueue(MainActivity.this);
+            JsonArrayRequest jsonReq = new JsonArrayRequest(Request.Method.GET,
+                    "https://thesimpsonsquoteapi.glitch.me/quotes?count="+ cantidad.getSelectedItem().toString(), null,
+                    new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            try {
+                                simpsons.clear();
+                                Simpsons[] simpsonsObt = new Gson()
+                                        .fromJson(response.toString(),
+                                                Simpsons[].class);
+                                simpsons.addAll(Arrays.asList(simpsonsObt));
+                            }catch (Exception ex){
+                                simpsons = null;
+                            }finally {
+                                adaptador.notifyDataSetChanged();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    simpsons = null;
+                    adaptador.notifyDataSetChanged();
+                }
+            });
             queue.add(jsonReq);
         });
     }
